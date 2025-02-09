@@ -2,6 +2,7 @@
     "compilerOptions": {
         "target": "ES6",
         "module": "CommonJS",
+<<<<<<< HEAD
         "outDir": "./dist",
         "rootDir": "./src",
         "strict": true,
@@ -9,4 +10,11 @@
     },
     "include": ["src"],
     "exclude": ["node_modules", "dist"]
+=======
+        "outDir": "dist",
+        "rootDir": "src",
+        "strict": true,
+        "esModuleInterop": true
+    }
+>>>>>>> 41a3e6f (setup for backend (#5) (#6))
 }

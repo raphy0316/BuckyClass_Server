@@ -3,9 +3,14 @@ import io from "socket.io-client";
 
 dotenv.config();
 
+<<<<<<< HEAD
 // http://localhost:5000
 // https://buckyclass.onrender.com/
 const SERVER_URL = "http://localhost:5000";
+=======
+const isLocal = process.env.SERVER_ENV === "local";
+const SERVER_URL = isLocal ? "http://localhost:5000" : "https://your-backend-service.onrender.com";
+>>>>>>> 41a3e6f (setup for backend (#5) (#6))
 
 // Connect to WebSocket server
 const socket = io(SERVER_URL, {
