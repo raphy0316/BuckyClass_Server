@@ -4,8 +4,6 @@ import app from "./app";
 import pool from "./db";
 
 const PORT = process.env.PORT || 5000;
-const isLocal = process.env.SERVER_ENV === "local";
-const SERVER_URL = isLocal ? "http://localhost:5000" : "https://your-backend-service.onrender.com";
 
 // Create an HTTP Server using Express
 const server = http.createServer(app);
@@ -43,5 +41,5 @@ io.on("connection", (socket) => {
 
 // Start the Server
 server.listen(PORT, () => {
-    console.log(`Server running on ${SERVER_URL}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
