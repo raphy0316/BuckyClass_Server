@@ -3,6 +3,8 @@ import io from "socket.io-client";
 
 dotenv.config();
 
+// http://localhost:5000
+// https://buckyclass.onrender.com/
 const SERVER_URL = "http://localhost:5000";
 
 // Connect to WebSocket server
