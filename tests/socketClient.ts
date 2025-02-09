@@ -3,8 +3,7 @@ import io from "socket.io-client";
 
 dotenv.config();
 
-const isLocal = process.env.SERVER_ENV === "local";
-const SERVER_URL = isLocal ? "http://localhost:5000" : "https://your-backend-service.onrender.com";
+const SERVER_URL = "http://localhost:5000";
 
 // Connect to WebSocket server
 const socket = io(SERVER_URL, {
