@@ -11,15 +11,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< HEAD
-=======
 const isProduction = process.env.NODE_ENV === "production";
 const serverUrl = isProduction ? "https://your-backend-service.onrender.com" : "http://localhost:5000";
 
 console.log(`🚀 Running API in ${isProduction ? "PRODUCTION (Render)" : "DEVELOPMENT (Local)"}`);
 console.log(`🌎 Server URL: ${serverUrl}`);
 
->>>>>>> 41a3e6f (setup for backend (#5) (#6))
+
 // Routes (Move API logic later)
 app.get("/", async (_, res) => {
     try {
