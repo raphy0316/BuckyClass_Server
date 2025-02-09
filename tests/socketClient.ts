@@ -3,7 +3,6 @@ import io from "socket.io-client";
 
 dotenv.config();
 
-
 const SERVER_URL = "http://localhost:5000";
 
 // Connect to WebSocket server
