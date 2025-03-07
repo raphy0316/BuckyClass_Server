@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ENV } from "../config/env";
-import { Course } from "../types/types";
+import { Course, Grade } from "../types/types";
 
 const ENDPOINTS = {
     COURSES: "/courses",
@@ -10,11 +10,10 @@ const ENDPOINTS = {
     INSTRUCTORS: "/instructors"
 };
 
-export const fetchCourses = async (query: string): Promise<Course[]> => {
+export const fetchCourses = async (): Promise<Course[]> => {
     try {
         const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSES}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` },
-            params: { query }
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
         });
 
         const courses = response.data.results || [];
@@ -22,12 +21,53 @@ export const fetchCourses = async (query: string): Promise<Course[]> => {
         return courses.map((course: any) => ({
             id: course.uuid,
             name: course.name,
-            number: course.number,
-            subjects: course.subjects
+            avgGrade: null,
+            subjects: course.subjects.map((subject: any) => subject.name)
         }));
     } catch (error) {
         console.error("MadGrades API 호출 오류:", error);
         return [];
+    }
+};
+
+const calculatePercentage = (count: number, total: number): number => {
+    return total > 0 ? parseFloat(((count / total) * 100).toFixed(2)) : 0;
+};
+
+export const fetchGrade = async (uuid: string): Promise<Grade | null> => {
+    try {
+        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+        });
+
+        const grade = response.data;
+
+        return {
+            id: grade.courseUuid,
+            total: grade.cumulative.total,
+            a_per: calculatePercentage(grade.cumulative.aCount, grade.cumulative.total),
+            ab_per: calculatePercentage(grade.cumulative.abCount, grade.cumulative.total),
+            b_per: calculatePercentage(grade.cumulative.bCount, grade.cumulative.total),
+            bc_per: calculatePercentage(grade.cumulative.bcCount, grade.cumulative.total),
+            c_per: calculatePercentage(grade.cumulative.cCount, grade.cumulative.total),
+            d_per: calculatePercentage(grade.cumulative.dCount, grade.cumulative.total),
+            f_per: calculatePercentage(grade.cumulative.fCount, grade.cumulative.total),
+            other_per: calculatePercentage(
+                (grade.cumulative.otherCount || 0) +
+                (grade.cumulative.sCount || 0) +
+                (grade.cumulative.uCount || 0) +
+                (grade.cumulative.crCount || 0) +
+                (grade.cumulative.nCount || 0) +
+                (grade.cumulative.pCount || 0) +
+                (grade.cumulative.iCount || 0) +
+                (grade.cumulative.nwCount || 0) +
+                (grade.cumulative.nrCount || 0),
+                grade.cumulative.total
+            )
+        };
+    } catch (error) {
+        console.error(`MadGrades API 호출 오류 (UUID: ${uuid}):`, error);
+        return null;
     }
 };
 
