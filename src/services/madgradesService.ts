@@ -1,11 +1,19 @@
 import axios from "axios";
-import { CONFIG, ENDPOINTS } from "./config";
-import { Course } from "./types";
+import { ENV } from "../config/env";
+import { Course } from "../types/types";
+
+const ENDPOINTS = {
+    COURSES: "/courses",
+    COURSE_DETAILS: (uuid: string) => `/courses/${uuid}`,
+    COURSE_GRADES : (uuid: string) => `/courses/${uuid}/grades`,
+    SUBJECTS: "/subjects",
+    INSTRUCTORS: "/instructors"
+};
 
 export const fetchCourses = async (query: string): Promise<Course[]> => {
     try {
-        const response = await axios.get(`${CONFIG.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSES}`, {
-            headers: { Authorization: `Token token=${CONFIG.API_TOKEN}` },
+        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSES}`, {
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` },
             params: { query }
         });
 
@@ -25,12 +33,12 @@ export const fetchCourses = async (query: string): Promise<Course[]> => {
 
 export const fetchCoursesDetail = async (uuid: string) => {
     try {
-        const courseResponse = await axios.get(`${CONFIG.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_DETAILS(uuid)}`, {
-            headers: { Authorization: `Token token=${CONFIG.API_TOKEN}` }
+        const courseResponse = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_DETAILS(uuid)}`, {
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
         });
 
-        const gradesResponse = await axios.get(`${CONFIG.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
-            headers: { Authorization: `Token token=${CONFIG.API_TOKEN}` }
+        const gradesResponse = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
         });
 
         const course = courseResponse.data;
@@ -69,8 +77,8 @@ export const fetchCoursesDetail = async (uuid: string) => {
 
 export const fetchSubjects = async () => {
     try {
-        const response = await axios.get(`${CONFIG.MADGRADES_API_BASE_URL}${ENDPOINTS.SUBJECTS}`, {
-            headers: { Authorization: `Token token=${CONFIG.API_TOKEN}` }
+        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.SUBJECTS}`, {
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
         });
 
         return response.data.results || [];
@@ -82,8 +90,8 @@ export const fetchSubjects = async () => {
 
 export const fetchInstructors = async () => {
     try {
-        const response = await axios.get(`${CONFIG.MADGRADES_API_BASE_URL}${ENDPOINTS.INSTRUCTORS}`, {
-            headers: { Authorization: `Token token=${CONFIG.API_TOKEN}` }
+        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.INSTRUCTORS}`, {
+            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
         });
 
         return response.data.results || [];
