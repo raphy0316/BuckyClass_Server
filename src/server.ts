@@ -1,48 +1,47 @@
-import http from "http";
-import { Server } from "socket.io";
-import app from "./app";
-import pool from "./db";
+import express from "express";
+import cors from "cors";
+import { fetchCourses, fetchCoursesDetail, fetchInstructors, fetchSubjects } from "./madgrades";
+import { saveCourses, getCourses } from "./firebase";
+import { CONFIG } from "./config";
 
-const PORT = process.env.PORT || 5000;
+const app = express();
+const PORT = CONFIG.PORT;
 
-const isLocal = process.env.SERVER_ENV === "local";
-const SERVER_URL = isLocal ? "http://localhost:5000" : "https://your-backend-service.onrender.com";
+app.use(cors());
+app.use(express.json());
 
-// Create an HTTP Server using Express
-const server = http.createServer(app);
-
-// WebSockets Setup
-const io = new Server(server, {
-    cors: { origin: "*" },
+app.get("/courses/:uuid", async (req, res) => {
+    try {
+        const { uuid } = req.params;
+        const courseDetail = await fetchCoursesDetail(uuid);
+        res.json(courseDetail);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to return course detail" });
+    }
 });
 
-interface ChatMessage {
-    text: string;
-}
-
-io.on("connection", (socket) => {
-    console.log(`✅ A user connected: ${socket.id}`);
-
-    // Handle incoming messages
-    socket.on("sendMessage", async (message: ChatMessage) => {
-        console.log("📩 Received message:", message);
-
-        try {
-            await pool.query("INSERT INTO messages (text) VALUES ($1)", [message]);
-            io.emit("receiveMessage", message); // Send message to all clients
-        } catch (err) {
-            const error = err as Error;
-            console.error("Database Insert Error:", error.message);
-        }
-    });
-
-    // Handle disconnection
-    socket.on("disconnect", () => {
-        console.log(`❌ User disconnected: ${socket.id}`);
-    });
+// MadGrades 데이터를 Firebase에 저장
+app.get("/firebase/update-courses", async (req, res) => {
+    try {
+        const { query } = req.query;
+        const courses = await fetchCourses(query as string);
+        await saveCourses(courses);
+        res.json({ success: true, message: "Courses updated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to update courses" });
+    }
 });
 
-// Start the Server
-server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Firebase에서 저장된 강의 데이터 가져오기
+app.get("/firebase/courses", async (req, res) => {
+    try {
+        const courses = await getCourses();
+        res.json(courses);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch courses" });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Backend server running at http://localhost:${PORT}`);
 });
