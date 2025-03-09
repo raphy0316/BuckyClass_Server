@@ -51,7 +51,6 @@ router.get("/:uuid", async (req, res): Promise<void> => {
         const id = req.params.uuid;
         const grade = await fetchGrade(id);
 
-
         res.status(200).json(grade);
     } catch (error) {
         console.error("Failed to update courses and grades:", error);
@@ -63,14 +62,14 @@ router.get("/:uuid", async (req, res): Promise<void> => {
 
 
 router.get("/subject/:subject", async (req, res): Promise<void> => {
-    const { subject } = req.params;
-
-    const query = `
-        SELECT * FROM courses
-        WHERE $1 = ANY(subjects);
-    `;
-
     try {
+        const { subject } = req.params;
+
+        const query = `
+            SELECT * FROM courses
+            WHERE $1 = ANY(subjects);
+        `;
+
         const result = await pool.query(query, [subject]);
 
         res.status(200).json(result.rows);
@@ -81,14 +80,15 @@ router.get("/subject/:subject", async (req, res): Promise<void> => {
 });
 
 router.get("/title/:title", async (req, res): Promise<void> => {
-    const { title } = req.params;
-
-    const query = `
-        SELECT * FROM courses
-        WHERE name LIKE $1;
-    `;
-
     try {
+        const { title } = req.params;
+
+        const query = `
+            SELECT * FROM courses
+            WHERE name LIKE '%' || $1 || '%';
+        `;
+
+
         const result = await pool.query(query, [title]);
 
         res.status(200).json(result.rows);

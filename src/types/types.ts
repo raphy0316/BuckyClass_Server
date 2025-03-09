@@ -6,7 +6,7 @@ export interface Course {
 }
 
 export interface Grade {
-    id: string;
+    course_id: string;
     total: number;
     a_per: number;
     ab_per: number;
@@ -16,4 +16,11 @@ export interface Grade {
     d_per: number;
     f_per: number;
     other_per: number;
+}
+
+export interface Review {
+    course_id: string;
+    user_id: string;
+    rating: number;
+    comment: string;
 }

@@ -1,45 +1,42 @@
-// import express from "express";
-// import { saveCourses, saveGrades, getCourses } from "../services/postgreService";
-// import { fetchCourses, fetchGrade } from "../services/madgradesService";
-//
-// const router = express.Router();
-//
-// router.post("/", async (req: Request, res: Response): Promise<void> => {
-//     const { id, userId, rating, comment } = req.body;
-//
-//
-//     if (!courseUuid || !userId || rating === undefined || !comment) {
-//         res.status(400).json({ error: "Missing required fields" });
-//         return;
-//     }
-//
-//     if (rating < 0 || rating > 5) {
-//         res.status(400).json({ error: "Rating must be between 0 and 5" });
-//         return;
-//     }
-//
-//
-//     const query = `
-//         INSERT INTO reviews (course_uuid, user_id, rating, comment)
-//         VALUES ($1, $2, $3, $4)
-//         RETURNING id;
-//     `;
-//
-//     try {
-//         const result = await pool.query(query, [courseUuid, userId, rating, comment]);
-//
-//
-//         res.status(201).json({
-//             message: "Review created successfully",
-//             reviewId: result.rows[0].id,
-//         });
-//     } catch (error) {
-//         console.error("Failed to save review:", error);
-//         res.status(500).json({ error: "Failed to create review" });
-//     }
-// });
-//
-//
-//
-//
-// export default router;
+import express from "express";
+import {getReview, saveReview} from "../services/postgreService";
+import { Review } from "../types/types";
+import {fetchGrade} from "../services/madgradesService";
+
+const router = express.Router();
+
+router.post("/", async (req, res): Promise<void> => {
+    try{
+        const {course_id, user_id, rating, comment} = req.body
+
+        const review: Review = {
+            course_id: course_id,
+            user_id: user_id,
+            rating: rating,
+            comment: comment
+        }
+
+        await saveReview(review);
+        res.status(201).json({ message: "Review saved successfully", review });
+    } catch (error) {
+        console.error("Error saving review:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/:course_id", async (req, res): Promise<void> => {
+    try {
+        const id = req.params.course_id;
+        const review = await getReview(id);
+
+        res.status(200).json(review);
+    } catch (error) {
+        console.error("Failed to update courses and grades:", error);
+        res.status(500).json({ error: "Failed to update courses and grades" });
+    }
+});
+
+
+
+
+export default router;

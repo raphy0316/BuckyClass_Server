@@ -11,23 +11,18 @@ const ENDPOINTS = {
 };
 
 export const fetchCourses = async (): Promise<Course[]> => {
-    try {
-        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSES}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
-        });
+    const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSES}`, {
+        headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+    });
 
-        const courses = response.data.results || [];
+    const courses = response.data.results || [];
 
-        return courses.map((course: any) => ({
-            id: course.uuid,
-            name: course.name,
-            avgGrade: null,
-            subjects: course.subjects.map((subject: any) => subject.name)
-        }));
-    } catch (error) {
-        console.error("MadGrades API 호출 오류:", error);
-        return [];
-    }
+    return courses.map((course: any) => ({
+        id: course.uuid,
+        name: course.name,
+        avgGrade: null,
+        subjects: course.subjects.map((subject: any) => subject.name)
+    }));
 };
 
 const calculatePercentage = (count: number, total: number): number => {
@@ -35,60 +30,54 @@ const calculatePercentage = (count: number, total: number): number => {
 };
 
 export const fetchGrade = async (uuid: string): Promise<Grade | null> => {
-    try {
-        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
-        });
+    const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
+        headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+    });
 
-        const grade = response.data;
+    const grade = response.data;
 
-        return {
-            id: grade.courseUuid,
-            total: grade.cumulative.total,
-            a_per: calculatePercentage(grade.cumulative.aCount, grade.cumulative.total),
-            ab_per: calculatePercentage(grade.cumulative.abCount, grade.cumulative.total),
-            b_per: calculatePercentage(grade.cumulative.bCount, grade.cumulative.total),
-            bc_per: calculatePercentage(grade.cumulative.bcCount, grade.cumulative.total),
-            c_per: calculatePercentage(grade.cumulative.cCount, grade.cumulative.total),
-            d_per: calculatePercentage(grade.cumulative.dCount, grade.cumulative.total),
-            f_per: calculatePercentage(grade.cumulative.fCount, grade.cumulative.total),
-            other_per: calculatePercentage(
-                (grade.cumulative.otherCount || 0) +
-                (grade.cumulative.sCount || 0) +
-                (grade.cumulative.uCount || 0) +
-                (grade.cumulative.crCount || 0) +
-                (grade.cumulative.nCount || 0) +
-                (grade.cumulative.pCount || 0) +
-                (grade.cumulative.iCount || 0) +
-                (grade.cumulative.nwCount || 0) +
-                (grade.cumulative.nrCount || 0),
-                grade.cumulative.total
-            )
-        };
-    } catch (error) {
-        console.error(`MadGrades API 호출 오류 (UUID: ${uuid}):`, error);
-        return null;
-    }
+    return {
+        course_id: grade.courseUuid,
+        total: grade.cumulative.total,
+        a_per: calculatePercentage(grade.cumulative.aCount, grade.cumulative.total),
+        ab_per: calculatePercentage(grade.cumulative.abCount, grade.cumulative.total),
+        b_per: calculatePercentage(grade.cumulative.bCount, grade.cumulative.total),
+        bc_per: calculatePercentage(grade.cumulative.bcCount, grade.cumulative.total),
+        c_per: calculatePercentage(grade.cumulative.cCount, grade.cumulative.total),
+        d_per: calculatePercentage(grade.cumulative.dCount, grade.cumulative.total),
+        f_per: calculatePercentage(grade.cumulative.fCount, grade.cumulative.total),
+        other_per: calculatePercentage(
+            (grade.cumulative.otherCount || 0) +
+            (grade.cumulative.sCount || 0) +
+            (grade.cumulative.uCount || 0) +
+            (grade.cumulative.crCount || 0) +
+            (grade.cumulative.nCount || 0) +
+            (grade.cumulative.pCount || 0) +
+            (grade.cumulative.iCount || 0) +
+            (grade.cumulative.nwCount || 0) +
+            (grade.cumulative.nrCount || 0),
+            grade.cumulative.total
+        )
+    };
 };
 
 export const fetchCoursesDetail = async (uuid: string) => {
-    try {
-        const courseResponse = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_DETAILS(uuid)}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
-        });
+    const courseResponse = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_DETAILS(uuid)}`, {
+        headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+    });
 
-        const gradesResponse = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
-        });
+    const gradesResponse = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.COURSE_GRADES(uuid)}`, {
+        headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+    });
 
-        const course = courseResponse.data;
+    const course = courseResponse.data;
 
-        const grades = gradesResponse.data;
+    const grades = gradesResponse.data;
 
-        const cumulative = grades.cumulative || {};
+    const cumulative = grades.cumulative || {};
 
-        const sumGPA =
-            ((cumulative.aCount * 4.0) +
+    const sumGPA =
+        ((cumulative.aCount * 4.0) +
             (cumulative.abCount * 3.5) +
             (cumulative.bCount * 3.0) +
             (cumulative.bcCount * 2.5) +
@@ -96,47 +85,33 @@ export const fetchCoursesDetail = async (uuid: string) => {
             (cumulative.dCount * 1.0) +
             (cumulative.fCount * 0.0));
 
-        const total = cumulative.total || {};
+    const total = cumulative.total || {};
 
-        const avgGPA = total > 0 ? sumGPA / total : 0;
+    const avgGPA = total > 0 ? sumGPA / total : 0;
 
-        const response = {
-            name : course.name,
-            names : course.names,
-            subjects : course.subjects,
-            courseOfferings : course.courseOfferings,
-            avgGPA : avgGPA
-        }
-
-        return response;
-    } catch (error) {
-        console.error(`강의 상세 정보 조회 오류 (UUID: ${uuid}):`, error);
-        return null;
+    const response = {
+        name : course.name,
+        names : course.names,
+        subjects : course.subjects,
+        courseOfferings : course.courseOfferings,
+        avgGPA : avgGPA
     }
+
+    return response;
 };
 
 export const fetchSubjects = async () => {
-    try {
-        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.SUBJECTS}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
-        });
+    const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.SUBJECTS}`, {
+        headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+    });
 
-        return response.data.results || [];
-    } catch (error) {
-        console.error("학과 목록 조회 오류:", error);
-        return [];
-    }
+    return response.data.results || [];
 };
 
 export const fetchInstructors = async () => {
-    try {
-        const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.INSTRUCTORS}`, {
-            headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
-        });
+    const response = await axios.get(`${ENV.MADGRADES_API_BASE_URL}${ENDPOINTS.INSTRUCTORS}`, {
+        headers: { Authorization: `Token token=${ENV.API_TOKEN}` }
+    });
 
-        return response.data.results || [];
-    } catch (error) {
-        console.error("교수 목록 조회 오류:", error);
-        return [];
-    }
+    return response.data.results || [];
 };
