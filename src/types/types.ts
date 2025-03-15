@@ -1,8 +1,6 @@
 export interface Course {
     id: string;
     name: string;
-    avgGrade: number | null;
-    subjects: string[];
 }
 
 export interface Grade {

@@ -66,8 +66,11 @@ router.get("/subject/:subject", async (req, res): Promise<void> => {
         const { subject } = req.params;
 
         const query = `
-            SELECT * FROM courses
-            WHERE $1 = ANY(subjects);
+            SELECT c.*
+            FROM "courses" c
+            JOIN "CoursesSubjects" cs ON c.id = cs.course_id
+            JOIN "subjects" s ON cs.subject_id = s.id
+            WHERE s.name = $1;
         `;
 
         const result = await pool.query(query, [subject]);

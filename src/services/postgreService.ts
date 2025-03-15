@@ -7,18 +7,16 @@ export const saveCourses = async (courses: Course[]): Promise<void> => {
 
     try {
         const query = `
-            INSERT INTO courses (id, name, avgGrade, subjects)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO courses (id, name)
+            VALUES ($1, $2)
             ON CONFLICT (id) 
-            DO UPDATE SET name = EXCLUDED.name, avgGrade = EXCLUDED.avgGrade, subjects = EXCLUDED.subjects;
+            DO UPDATE SET name = EXCLUDED.name;
         `;
 
         for (const course of courses) {
             await client.query(query, [
                 course.id,
-                course.name,
-                course.avgGrade,
-                course.subjects
+                course.name
             ]);
         }
 
@@ -67,9 +65,7 @@ export const getCourses = async (): Promise<Course[]> => {
         const result = await client.query("SELECT * FROM courses");
         return result.rows.map(row => ({
             id: row.id,
-            name: row.name,
-            avgGrade: row.avgGrade,
-            subjects: row.subjects
+            name: row.name
         }));
     } finally {
         client.release();

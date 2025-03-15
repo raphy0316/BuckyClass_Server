@@ -23,6 +23,7 @@
     },
     "homepage": "https://github.com/LIKELION-CS-Team-2-SP-25/BuckyClass-general-api#readme",
     "dependencies": {
+        "@neondatabase/serverless": "^0.10.4",
         "axios": "^1.8.1",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",

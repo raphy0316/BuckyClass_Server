@@ -20,7 +20,6 @@ export const fetchCourses = async (): Promise<Course[]> => {
     return courses.map((course: any) => ({
         id: course.uuid,
         name: course.name,
-        avgGrade: null,
         subjects: course.subjects.map((subject: any) => subject.name)
     }));
 };
